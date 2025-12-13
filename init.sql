@@ -1,10 +1,14 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET collation_connection = 'utf8mb4_unicode_ci';
 DROP TABLE IF EXISTS `food`;
 
 CREATE TABLE `food` (
-  `id` int(11) NOT NULL,
-  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `detail` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `imageUrl` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `detail` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `imageUrl` VARCHAR(2048) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `food` (`id`, `name`, `detail`, `imageUrl`) VALUES
@@ -21,8 +25,4 @@ INSERT INTO `food` (`id`, `name`, `detail`, `imageUrl`) VALUES
 (11, 'ข้าวหมกไก่', 'ข้าวหุงกับเครื่องเทศ เสิร์ฟพร้อมไก่นุ่ม', 'https://media.discordapp.net/attachments/1008415932651155578/1449321380964204574/images.png?ex=693e7938&is=693d27b8&hm=afeb2d5c1fb3db1615c22003403d9b26ed27ebd077b0112eacff1c0517255610&=&format=webp&quality=lossless&width=450&height=450'),
 (12, 'ข้าวต้มหมู', 'ข้าวต้มร้อน ๆ ซุปใส หมูนุ่ม กินสบายท้อง', 'https://media.discordapp.net/attachments/1008415932651155578/1449321466091798618/4e0063e0a0354fb5b15caa9993e085c2.png?ex=693e794c&is=693d27cc&hm=52218a8cbd93caafcf4e665dd89690c0c610656b384fe4af4f48d67e20703a50&=&format=webp&quality=lossless&width=1334&height=1334');
 
-ALTER TABLE `food`
-  ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `food`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+ALTER TABLE `food` AUTO_INCREMENT = 13;

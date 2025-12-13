@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config(); 
 
 const app = express();
 app.use(express.json());
@@ -29,16 +29,15 @@ app.get('/health', async (req, res) => {
   }
 });
 
-app.get('/attractions', async (req, res) => {
+app.get('/foods', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM attraction');
+    const [rows] = await pool.query('SELECT * FROM food');
     res.json(rows);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ status: 'error', message: e.message });
   }
 });
 
 const port = Number(process.env.PORT || 3001);
 app.listen(port, () => console.log(`API listening on http://localhost:${port}`));
-
