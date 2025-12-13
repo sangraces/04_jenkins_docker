@@ -1,0 +1,10 @@
+# environment variables
+.env
+
+# dependencies
+node_modules
+01_api/node_modules
+02_frontend/node_modules
+
+# system files
+.DS_Store
