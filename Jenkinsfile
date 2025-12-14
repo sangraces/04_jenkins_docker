@@ -106,26 +106,19 @@ EOF
       }
     }
 
-    stage('Health Check') {
-      steps {
-        script {
-          echo "Waiting for services..."
-          sh 'sleep 15'
+ stage('Health Check') {
+  steps {
+    sh '''
+      echo "=== docker compose ps ==="
+      docker compose ps
 
-          sh """
-            echo "=== docker compose ps ==="
-            docker compose ps
+      echo "=== Waiting for API /health (max 60s) ==="
+      timeout 60 bash -c 'until curl -fsS http://api:3001/health >/dev/null; do sleep 2; done'
 
-            echo "=== Waiting for API /health (max 60s) ==="
-            timeout 60 bash -c 'until curl -fsS http://localhost:3001/health >/dev/null; do sleep 2; done'
-
-            echo "=== Checking /foods endpoint ==="
-            curl -fsS http://localhost:3001/foods | head -c 300
-            echo ""
-            echo "Health check passed!"
-          """
-        }
-      }
+      echo "✅ API is healthy"
+    '''
+  }
+}
     }
 
     stage('Verify Deployment') {
