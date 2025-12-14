@@ -54,8 +54,8 @@ pipeline {
             string(credentialsId: 'MYSQL_ROOT_PASSWORD', variable: 'MYSQL_ROOT_PASS'),
             string(credentialsId: 'MYSQL_PASSWORD', variable: 'MYSQL_PASS')
           ]) {
-
-            sh """
+            // ใช้ ''' ... ''' เพื่อเลี่ยง Groovy interpolation (ลด warning เรื่อง secret)
+            sh '''
               cat > .env <<EOF
 # MySQL
 MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASS}
@@ -70,15 +70,15 @@ API_PORT=3001
 FRONTEND_PORT=3000
 
 # Frontend public env
-NEXT_PUBLIC_API_HOST=${params.NEXT_PUBLIC_API_HOST}
+NEXT_PUBLIC_API_HOST=${NEXT_PUBLIC_API_HOST}
 
-# API DB connection (IMPORTANT: host is service name in docker network)
+# API DB connection (host = service name in docker network)
 DB_HOST=mysql
 DB_NAME=dit312_6603105
 DB_USER=appuser
 DB_PASSWORD=${MYSQL_PASS}
 EOF
-            """
+            '''
           }
 
           echo ".env created (not printed for security)."
@@ -98,32 +98,46 @@ EOF
           }
           sh downCmd
 
-          sh """
+          sh '''
             docker compose build --no-cache
             docker compose up -d
-          """
+          '''
         }
       }
     }
 
- stage('Health Check') {
-  steps {
-    sh '''
-      echo "=== docker compose ps ==="
-      docker compose ps
+    stage('Health Check') {
+      steps {
+        script {
+          sh '''
+            echo "Waiting for services..."
+            sleep 15
 
-      echo "=== Waiting for API /health (max 60s) ==="
-      timeout 60 bash -c 'until curl -fsS http://api:3001/health >/dev/null; do sleep 2; done'
+            echo "=== docker compose ps ==="
+            docker compose ps
 
-      echo "✅ API is healthy"
-    '''
-  }
-}
+            echo "=== Detect compose network from api container ==="
+            API_CID=$(docker compose ps -q api)
+            NET_NAME=$(docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{println $k}}{{end}}' "$API_CID" | head -n 1)
+            echo "Using network: $NET_NAME"
+
+            echo "=== Waiting for API /health (max 90s) ==="
+            timeout 90 bash -c "
+              until docker run --rm --network $NET_NAME curlimages/curl:8.5.0 -fsS http://api:3001/health >/dev/null
+              do
+                sleep 2
+              done
+            "
+
+            echo "✅ API healthy"
+          '''
+        }
+      }
     }
 
     stage('Verify Deployment') {
       steps {
-        sh """
+        sh '''
           echo "=== Container Status ==="
           docker compose ps
 
@@ -132,7 +146,7 @@ EOF
           echo "Frontend:   http://localhost:3000"
           echo "API:        http://localhost:3001"
           echo "phpMyAdmin: http://localhost:8888"
-        """
+        '''
       }
     }
   }
@@ -147,7 +161,7 @@ EOF
 
     failure {
       echo "❌ CI/CD failed"
-      sh 'docker compose logs --tail=80 || true'
+      sh 'docker compose logs --tail=120 || true'
       sh 'docker compose ps || true'
     }
 

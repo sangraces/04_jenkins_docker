@@ -58,8 +58,9 @@ services:
     depends_on: [api]
     networks: [stack]
 
-volumes:
-  mysql_data:
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 networks:
   stack:
