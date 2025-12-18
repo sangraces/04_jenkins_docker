@@ -60,7 +60,6 @@ services:
 
   jenkins:
     build: ./03_jenkins
-    container_name: jenkins
     user: root
     restart: unless-stopped
     ports:
